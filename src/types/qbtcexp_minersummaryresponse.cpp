@@ -22,42 +22,25 @@
  *
  */
 
-#include "qbtcexp_networking.h"
+#include "qbtcexp_minersummaryresponse.h"
 
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include <QJsonArray>
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
+MinerSummaryResponse::MinerSummaryResponse()
 {}
 
-QByteArray Networking::get(const QString& urlPart)
+MinerSummaryResponse::MinerSummaryResponse(const QJsonObject& jsonObject) :
+    m_overall(OverallMinerSummary(jsonObject.value("overall").toObject()))
 {
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
+    QJsonObject minersJsonObject = jsonObject.value("miners").toObject();
 
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
+    for (const QJsonValue& jsonValue : jsonObject.value("minerNamesSortedByBlockCount").toArray()) {
+        QString minerName = jsonValue.toString();
+        m_minerNamesSortedByBlockCount.append(minerName);
+        m_miners.insert(minerName,MinerSummary(minersJsonObject.value(minerName).toObject()));
+    }
 }
 
-} //namespace QtBtcExplorer
+} // namespace QtBtcExplorer

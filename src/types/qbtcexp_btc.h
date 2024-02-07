@@ -54,6 +54,14 @@ public:
     /*! @brief Returns amount of bitcoin in sats. */
     qint64 satoshi() const   { return m_satoshi; }
 
+    /*! @brief Returns Btc object with BTC amount specified in input string.
+     *  @details Accepts strings containing values with floating point. In case of wrong input - invalid Btc object is
+     *           returned. */
+    static Btc fromBtcString(const QString& btc);
+
+    /*! @brief Returns Btc object with BTC amount specified in input double. */
+    static Btc fromBtcDouble(double btc);
+
 private:
     qint64 m_satoshi;
 };

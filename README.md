@@ -1,18 +1,18 @@
 ## QtBtcExplorer
 
 This is a small api wrapper to communicate with bitcoin blockchain explorer running [btc-rpc-explorer](https://github.com/janoside/btc-rpc-explorer).
-This wrapper is written on c++ using Qt. Tested using Qt 5.15.8.
+This wrapper is written on c++ using Qt. Tested using Qt 5.15.8 and Qt 6.4.2.
 
 For additional information you can check:
 - [btc-rpc-explorer github](https://github.com/janoside/btc-rpc-explorer)
 - [Bitcoin explorer API documentation](https://bitcoinexplorer.org/api/docs)
 - [Running example of server](https://bitcoinexplorer.org/)
 
-Current version: 0.0.1
+Current version: 0.0.2
 
 ## Adding QtBtcExplorer to yout project
 
-Download QtEtherscan from github
+Download QtBtcExplorer from github
 ```bash
 mkdir lib && cd lib
 git clone https://github.com/ivan-odinets/QtBtcExplorer.git

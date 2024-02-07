@@ -28,27 +28,31 @@
 
 namespace QtBtcExplorer {
 
-Address::Address()
+Address::Address() :
+    m_isValidField{false},
+    m_isScript{false},
+    m_isWintess{false},
+    m_witnessVersion{-1}
 {}
 
 Address::Address(const QJsonObject& jsonObject) :
-    m_encoding(jsonObject.value("encoding").toString())
+    m_encoding               {jsonObject.value("encoding").toString()               },
+    m_electrumScripthash     {jsonObject.value("electrumScripthash").toString()     },
+    m_txHistory              {jsonObject.value("txHistory").toObject()              }
 {
     // validateaddress block
     QJsonObject temp = jsonObject.value("validateaddress").toObject();
-    m_address = temp.value("address").toString();
-    m_scriptPubKey = temp.value("scriptPubKey").toString();
-    m_isScript = temp.value("isscript").toBool();
-    m_isWintess = temp.value("iswitness").toBool();
-    m_witnessVersion = temp.value("witness_version").toInt();
-    m_witnessProgram = temp.value("witness_program").toString();
+    m_address =         temp.value("address").toString();
+    m_isValidField =    temp.value("isvalid").toBool();
+    m_scriptPubKey =    temp.value("scriptPubKey").toString();
+    m_isScript =        temp.value("isscript").toBool();
+    m_isWintess =       temp.value("iswitness").toBool();
+    m_witnessVersion =  temp.value("witness_version").toInt(-1);
+    m_witnessProgram =  temp.value("witness_program").toString();
 
     // txHistory block
     temp = jsonObject.value("txHistory").toObject();
-    m_txCount = temp.value("txCount").toDouble();
-    for (const QJsonValue& jsonValue : temp.value("txids").toArray())
-        m_txIds.append(jsonValue.toString());
-    m_balance = Btc(temp.value("balanceSat").toDouble());
+
 }
 
 } // namespace QtBtcExplorer

@@ -22,42 +22,17 @@
  *
  */
 
-#include "qbtcexp_networking.h"
-
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include "qbtcexp_miner.h"
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
+Miner::Miner()
 {}
 
-QByteArray Networking::get(const QString& urlPart)
-{
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
+Miner::Miner(const QJsonObject& jsonObject) :
+    m_name         {jsonObject.value("name").toString()         },
+    m_link         {jsonObject.value("link").toString()         },
+    m_identifiedBy {jsonObject.value("identifiedBy").toString() }
+{}
 
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
-}
-
-} //namespace QtBtcExplorer
+} // namespace QtBtcExplorer

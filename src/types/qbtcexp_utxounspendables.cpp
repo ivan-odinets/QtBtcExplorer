@@ -22,42 +22,22 @@
  *
  */
 
-#include "qbtcexp_networking.h"
-
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include "qbtcexp_utxounspendables.h"
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
+UtxoUnspendables::UtxoUnspendables() :
+    m_genesisBlock{-1},
+    m_bip30{-1},
+    m_scripts{-1},
+    m_unclaimedRewards{-1}
 {}
 
-QByteArray Networking::get(const QString& urlPart)
-{
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
+UtxoUnspendables::UtxoUnspendables(const QJsonObject& jsonObject) :
+    m_genesisBlock{jsonObject.value("genesis_block").toInt(-1)},
+    m_bip30{jsonObject.value("bip30").toInt(-1)},
+    m_scripts{jsonObject.value("scripts").toInt(-1)},
+    m_unclaimedRewards{jsonObject.value("unclaimed_rewards").toInt(-1)}
+{}
 
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
-}
-
-} //namespace QtBtcExplorer
+} // namespace QtBtcExplorer

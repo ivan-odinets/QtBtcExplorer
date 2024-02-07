@@ -22,22 +22,25 @@
  *
  */
 
-#include "qbtcexp_btcprice.h"
+#include "qbtcexp_nexthalving.h"
 
 namespace QtBtcExplorer {
 
-BtcPrice::BtcPrice() :
-    m_btcUsd{-1.0},
-    m_btcEur{-1.0},
-    m_btcGbp{-1.0},
-    m_btcXau{-1.0}
+NextHalving::NextHalving() :
+    m_nextHalvingIndex{-1},
+    m_nextHalvingBlock{-1},
+    m_nextHalvingSubsidy{-1.0},
+    m_blocksUntilNextHalving{-1}
 {}
 
-BtcPrice::BtcPrice(const QJsonObject& jsonObject) :
-    m_btcUsd{jsonObject.value("usd").toString("-1.0").toDouble()},
-    m_btcEur{jsonObject.value("eur").toString("-1.0").toDouble()},
-    m_btcGbp{jsonObject.value("gbp").toString("-1.0").toDouble()},
-    m_btcXau{jsonObject.value("xau").toString("-1.0").toDouble()}
+NextHalving::NextHalving(const QJsonObject& jsonObject) :
+    m_nextHalvingIndex            {jsonObject.value("nextHalvingIndex").toInt(-1)                                 },
+    m_nextHalvingBlock            {jsonObject.value("nextHalvingBlock").toInt(-1)                                 },
+    m_nextHalvingSubsidy          {jsonObject.value("nextHalvingSubsidy").toString("-1").toDouble()               },
+    m_blocksUntilNextHalving      {jsonObject.value("blocksUntilNextHalving").toInt(-1)                           },
+    m_timeUntilNextHalving        {jsonObject.value("timeUntilNextHalving").toString()                            },
+    m_nextHalvingEstimatedDate    {QDateTime::fromString(jsonObject.value("nextHalvingEstimatedDate").toString(),
+                                                         Qt::ISODateWithMs)                                       }
 {}
 
 } // namespace QtBtcExplorer

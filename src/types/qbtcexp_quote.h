@@ -30,17 +30,30 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include "qtbtcexp_json_objectslist.h"
+#include "qbtcexp_json_objectslist.h"
 
 namespace QtBtcExplorer {
+
+/*! @class Quote src/types/qbtcexp_quote.h
+ *  @brief Object of this class represents reply of API::quote and API::randomQuote methods ( /api/quotes/$INDEX and
+ *         /api/quotes/random ). Moreover a list of such objects (QuoteList) is returned as reply of API::allQuotes
+ *         method ( /api/quotes/all )
+ *
+ * @see https://bitcoinexplorer.org/api/docs
+ * @see https://github.com/janoside/btc-rpc-explorer */
 
 class Quote
 {
 public:
+    /*! @brief Default constructor. Conastructs invalid Quote object. */
     Quote();
     Quote(const QJsonObject& jsonObject);
     Quote(const QJsonValue& jsonValue) :
         Quote(jsonValue.toObject()) {}
+
+    /*! @brief Returns true if this Quote object contains valid information. Quote object is considered to be valid if
+     *         text() is not empty. */
+    bool      isValid() const     { return !m_text.isEmpty(); }
 
     QString   text() const        { return m_text; }
     QString   speaker() const     { return m_speaker; }
@@ -72,14 +85,15 @@ inline QDebug operator<< (QDebug dbg, const Quote& quote)
  *  @brief This is a list of Quote objects. It is returned by method API::allQuotes Nothing more than a QList with some
  *         extra constructors (JsonObjectsList).
  *
- * @see https://bitcoinexplorer.org/api/docs */
+ * @see https://bitcoinexplorer.org/api/docs
+ * @see https://github.com/janoside/btc-rpc-explorer */
 
 typedef JsonObjectsList<Quote> QuoteList;
 
-inline QDebug operator<< (QDebug dbg, const QuoteList& accountBalanceList)
+inline QDebug operator<< (QDebug dbg, const QuoteList& quoteList)
 {
     dbg.nospace() << qUtf8Printable(QString("QuoteList(count=%1)")
-                   .arg(accountBalanceList.count()));
+                   .arg(quoteList.count()));
 
     return dbg.maybeSpace();
 }

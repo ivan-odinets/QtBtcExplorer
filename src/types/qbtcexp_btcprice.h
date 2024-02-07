@@ -31,13 +31,25 @@
 
 namespace QtBtcExplorer {
 
+/*! @class BtcPrice src/types/qbtcexp_btcprice.h
+ *  @brief Object of this class represents reply of API::price method ( /api/price ).
+ *
+ * @see https://bitcoinexplorer.org/api/docs
+ * @see https://github.com/janoside/btc-rpc-explorer */
+
 class BtcPrice
 {
 public:
+    /*! @brief Default constructor. Constructs invalid BtcPrice object. */
     BtcPrice();
     BtcPrice(const QJsonObject& jsonObject);
     BtcPrice(const QJsonValue& jsonValue) :
         BtcPrice(jsonValue.toObject()) {}
+
+    /*! @brief Returns true if this BtcPrice object contains valid information. BtcPrice object is considered to be valid
+     *         if all price fields are containing anything but not -1. */
+    bool isValid() const  { return (m_btcUsd != -1.0) && (m_btcEur != -1.0) &&
+                                   (m_btcGbp != -1.0) && (m_btcXau != -1.0); }
 
     double btcUsd() const { return m_btcUsd; }
     double btcEur() const { return m_btcEur; }
@@ -53,7 +65,7 @@ private:
 
 inline QDebug operator<< (QDebug dbg, const BtcPrice& btcPrice)
 {
-    dbg.nospace() << qUtf8Printable(QString("BtcPrice(usd%1; eur=%2)")
+    dbg.nospace() << qUtf8Printable(QString("BtcPrice(usd=%1; eur=%2)")
                                     .arg(btcPrice.btcUsd())
                                     .arg(btcPrice.btcEur()));
 

@@ -22,42 +22,20 @@
  *
  */
 
-#include "qbtcexp_networking.h"
-
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include "qbtcexp_txhistoryrequest.h"
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
+TxHistoryRequest::TxHistoryRequest() :
+    m_limit{-1},
+    m_offset{-1},
+    m_sort{Unknown}
 {}
 
-QByteArray Networking::get(const QString& urlPart)
-{
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
+TxHistoryRequest::TxHistoryRequest(const QJsonObject& jsonObject) :
+    m_limit   {             jsonObject.value("limit").toInt(-1)      },
+    m_offset  {             jsonObject.value("offset").toInt(-1)     },
+    m_sort    {stringToSort(jsonObject.value("sort").toString())     }
+{}
 
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
-}
-
-} //namespace QtBtcExplorer
+} // namespace QtBtcExplorer

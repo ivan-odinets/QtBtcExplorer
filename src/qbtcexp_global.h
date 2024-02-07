@@ -22,42 +22,43 @@
  *
  */
 
-#include "qbtcexp_networking.h"
+#ifndef QT_BTCEXPLORER__GLOBAL_H
+#define QT_BTCEXPLORER__GLOBAL_H
 
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include <QString>
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
-{}
+enum Sort {
+    Asc,
+    Desc,
+    Unknown
+};
 
-QByteArray Networking::get(const QString& urlPart)
+inline Sort stringToSort(const QString& string)
 {
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
+    if (string == QLatin1String("desc"))
+        return Desc;
+    if (string == QLatin1String("asc"))
+        return Asc;
 
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
+    return Unknown;
 }
 
-} //namespace QtBtcExplorer
+inline QString sortToSrting(Sort sort)
+{
+    switch (sort) {
+    case Asc:
+        return QLatin1String("asc");
+    case Desc:
+        return QLatin1String("desc");
+    case Unknown:
+        return QLatin1String("");
+    }
+    Q_ASSERT(false);
+    return QString();
+}
+
+} // namespace QtBtcExplorer
+
+#endif // QBTCEXP_GLOBAL_H

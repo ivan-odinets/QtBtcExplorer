@@ -22,42 +22,30 @@
  *
  */
 
-#include "qbtcexp_networking.h"
-
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include "qbtcexp_mempoolfees.h"
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
+MempoolFees::MempoolFees() :
+    m_nextBlockSmart{-1},
+    m_nextBlockMin{-1},
+    m_nextBlockMax{-1},
+    m_nextBlockMedian{-1},
+    m_30min{-1},
+    m_60min{-1},
+    m_1day{-1}
 {}
 
-QByteArray Networking::get(const QString& urlPart)
+MempoolFees::MempoolFees(const QJsonObject& jsonObject) :
+    m_30min{jsonObject.value("30min").toInt(-1)},
+    m_60min{jsonObject.value("60min").toInt(-1)},
+    m_1day{jsonObject.value("1day").toInt(-1)}
 {
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
-
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
+    QJsonObject nextBlock =  jsonObject.value("nextBlock").toObject();
+    m_nextBlockSmart =       nextBlock.value("smart").toInt(-1);
+    m_nextBlockMin =         nextBlock.value("min").toInt(-1);
+    m_nextBlockMax =         nextBlock.value("max").toInt(-1);
+    m_nextBlockMedian =      nextBlock.value("median").toInt(-1);
 }
 
-} //namespace QtBtcExplorer
+} // namespace QtBtcExplorer

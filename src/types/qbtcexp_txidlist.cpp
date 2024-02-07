@@ -22,42 +22,22 @@
  *
  */
 
-#include "qbtcexp_networking.h"
+#include "qbtcexp_txidlist.h"
 
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include <QJsonArray>
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
+TxIdList::TxIdList() :
+    m_txCount{-1}
 {}
 
-QByteArray Networking::get(const QString& urlPart)
+TxIdList::TxIdList(const QJsonObject& jsonObject) :
+    m_txCount {jsonObject.value("txCount").toInt(-1)  }
 {
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
-
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
+    QJsonArray txidsJsonArray = jsonObject.value("txids").toArray();
+    for (const QJsonValue& jsonValue : txidsJsonArray)
+        m_txIds.append(jsonValue.toString());
 }
 
-} //namespace QtBtcExplorer
+} // namespace QtBtcExplorer

@@ -22,42 +22,24 @@
  *
  */
 
-#include "qbtcexp_networking.h"
-
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QTimer>
-#include <QUrlQuery>
+#include "qbtcexp_overallminersummary.h"
 
 namespace QtBtcExplorer {
 
-Networking::Networking(QObject* parent) :
-    QObject{parent},
-    m_host{QLatin1String("https://bitcoinexplorer.org")},
-    m_timeout{0}
+OverallMinerSummary::OverallMinerSummary() :
+    m_blockCount{-1},
+    m_totalTransactions{-1},
+    m_totalWeight{-1},
+    m_subsidyCount{-1}
 {}
 
-QByteArray Networking::get(const QString& urlPart)
-{
-    QNetworkRequest req;
-    QUrl url(m_host + QLatin1String("/api") + urlPart);
-    req.setUrl(url);
+OverallMinerSummary::OverallMinerSummary(const QJsonObject& jsonObject) :
+    m_blockCount        {       jsonObject.value("blockCount").toInt(-1)                 },
+    m_totalFees         {Btc::fromBtcString(jsonObject.value("totalFees").toString())    },
+    m_totalSubsidy      {Btc::fromBtcString(jsonObject.value("totalSubsidy").toString()) },
+    m_totalTransactions {qint64(jsonObject.value("totalTransactions").toDouble(-1.0))    },
+    m_totalWeight       {qint64(jsonObject.value("totalWeight").toDouble(-1.0))          },
+    m_subsidyCount      {       jsonObject.value("subsidyCount").toInt(-1)               }
+{}
 
-    QEventLoop waitLoop;
-
-    if (m_timeout != 0)
-        QTimer::singleShot(m_timeout,&waitLoop,&QEventLoop::quit);
-
-    QNetworkReply *reply = m_nam.get(req);
-    QObject::connect(reply, &QNetworkReply::finished, &waitLoop, &QEventLoop::quit);
-
-    waitLoop.exec();
-    if (reply->isRunning())
-        reply->abort();
-
-    QByteArray result = reply->readAll();
-    reply->deleteLater();
-    return result;
-}
-
-} //namespace QtBtcExplorer
+} // namespace QtBtcExplorer
